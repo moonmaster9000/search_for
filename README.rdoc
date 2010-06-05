@@ -1,0 +1,37 @@
+=Introduction
+
+A simple gem for adding a chainable search method to ActiveRecord::Base (rails 3) 
+
+=Installation
+
+To install, add this to your bundler Gemfile 
+
+  gem 'search_for'
+
+Next, go to the root of your project in a shell and run this command (you may need to use "sudo" depending on your environment): 
+
+  λ bundle install 
+  
+=Usage
+
+Suppose you'd like to create a simple quicksearch form for searching your Book database. 
+We'll assume your books have the following attributes: "title, author, description, genre"
+
+If someone searches for "romance", we'd like to it to return any books where the title, author, description, or genre matches "romance"
+
+If someone searches for "space odyssey", we want it to narrow results: now a column attribute matches only if that attributes contains both "Space" and "Odyssey".
+
+How does it work? Assuming our form posts a 'query' param, then we could do something like this in our controller:
+
+  Book.search_for params[:query], :on => [:title, :author, :description, :genre] 
+
+The sql generated would look something like this (assuming params[:query] = "space odyseey"):
+
+  Book.search_for(params[:query], :on => [:title, :author, :description, :genre]).to_sql
+  # ==> 
+  #    SELECT * FROM "books" WHERE (
+  #         (title LIKE '%space%' AND title LIKE '%odyssey%')
+  #      OR (author LIKE '%space%' AND author LIKE '%odyssey%')
+  #      OR (description LIKE '%space%' AND description LIKE '%odyssey%')
+  #      OR (genre LIKE '%space%' AND genre LIKE '%odyssey%')
+  #    )
